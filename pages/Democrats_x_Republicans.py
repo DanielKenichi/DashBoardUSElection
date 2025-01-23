@@ -6,6 +6,8 @@ import json
 import os
 from dataset.get_dataset import get_dataframe
 
+processed_dfs = dict()
+
 def get_state_votes_df(df):
     state_votes_df = df.groupby("state")[["2020 Democrat vote raw", "2020 Republican vote raw", "2020 other vote raw"]].sum()
 
@@ -27,16 +29,33 @@ def get_county_votes_df(df):
         "2020 other vote %": "other_percentage",
     })
 
-    response = requests.get("https://github.com/kjhealy/fips-codes/blob/master/state_and_county_fips_master.csv")
+    response = requests.get(
+        "https://github.com/kjhealy/fips-codes/blob/master/state_and_county_fips_master.csv"
+    )
 
     with open("./data/fips.csv", "r") as file: 
         fips_df = pd.read_csv(file)
 
-    fips_df = fips_df[~fips_df["name"].str.isupper()]
+    map_df["state_ac"] = ""
 
-    map_df = map_df.merge(
-        fips_df[["name", "fips"]], left_on="county", right_on="name", how="left",
-    ).drop(columns=["name"])
+    for state in map_df["state"].unique().tolist():
+        state_row = fips_df[fips_df["name"] == state.upper()]
+        row_with_ac = fips_df.iloc[state_row.index[0] + 1]
+
+        state_acron = row_with_ac["state"]
+
+        map_df.loc[map_df["state"] == state, "state_ac"] = state_acron
+
+    result_df = map_df.merge(
+        fips_df[["fips", "name", "state"]], 
+        left_on=["county", "state_ac"], 
+        right_on=["name", "state"], 
+        how="left",
+    )
+
+    result_df = result_df.drop(columns=["name"])
+
+    map_df["fips"] = result_df["fips"]
 
     map_df["fips"] = map_df["fips"].apply(lambda x: str(x).zfill(5))
 
@@ -56,6 +75,16 @@ def determine_color(map_df):
 
 st.set_page_config(
     page_title="Democrats x Republicans",
+    layout="wide"
+)
+
+st.markdown(
+    """
+    # Pergunta 1
+    - Quais estados tiveram maioria republicana e Quais democrata?
+        - Hipótese1 : A maioria dos estados teve maioria republicana
+        - Hipótese2:  A maioria dos estados teve maioria democrata
+    """
 )
 
 st.write("# Democrats x Republicans")
@@ -103,12 +132,19 @@ with open(file_name, "r") as file:
     geo_json_data = json.load(file)
 
 row1 = st.columns(1)
-map_plot = px.choropleth_map(data_frame=map_df, geojson=geo_json_data, color="winner party",
-                        locations=field_name, featureidkey=property_name,
-                        center = {"lat": 37.0902, "lon": -95.7129},zoom=3,
-                        color_discrete_map=color_map)
-row1[0].plotly_chart(map_plot)
+map_plot = px.choropleth_map(
+    data_frame=map_df, 
+    geojson=geo_json_data, 
+    color="winner party",
+    locations=field_name, featureidkey=property_name,
+    center = {"lat": 37.0902, "lon": -95.7129},
+    zoom=2.5,
+    color_discrete_map=color_map
+)
+row1[0].plotly_chart(map_plot, use_container_width=True)
 
+
+st.write(len(map_df))
 #preparing df for the barplot
 counts = map_df["winner party"].value_counts()
 counts_df = pd.DataFrame(counts).transpose()
@@ -138,4 +174,4 @@ bar_plot.update_layout(
 )
 bar_plot.update_traces(textposition='outside', textfont=dict(size=16))
 
-row2[0].plotly_chart(bar_plot)
+row2[0].plotly_chart(bar_plot, use_container_width=True)
