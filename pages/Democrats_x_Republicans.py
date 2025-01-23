@@ -143,8 +143,6 @@ map_plot = px.choropleth_map(
 )
 row1[0].plotly_chart(map_plot, use_container_width=True)
 
-
-st.write(len(map_df))
 #preparing df for the barplot
 counts = map_df["winner party"].value_counts()
 counts_df = pd.DataFrame(counts).transpose()
