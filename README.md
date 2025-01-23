@@ -6,14 +6,14 @@ Project for a college subject at UFSCar which the objective of plotting a dashbo
 
 ```
     pipx install poetry
-    poetry install
+    poetry install --no-root
 ```
 
 
 # Install the requirements with requirements.txt
 
 ```
-    python -m venv .venv
+    python3 -m venv .venv
     source .venv/bin/activate
     pip install -r requirements.txt
 ```
@@ -24,4 +24,4 @@ Initial exploratory analysis of this dataset for pre-processing can be found at 
 
 # Start the dashboard
 
-To start the dashboard run ``` poetry run streamlit run main.py ```
+To start the dashboard run ``` poetry run streamlit run main.py ``` or ```streamlit run main.py```
