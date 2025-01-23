@@ -37,6 +37,8 @@ education_level = st.selectbox(
     format_func=lambda x: education_level_options[x],
 )
 
+col1, col2 = st.columns([1, 1])
+
 df['republican_votes'] = df['2020 Republican vote %'] * df['Total Population']
 df['democrat_votes'] = df['2020 Democrat vote %'] * df['Total Population']
 
@@ -78,13 +80,14 @@ for fig in [fig1, fig2]:
     for trace in fig.data:
         max_y_value = max(max_y_value, trace.y.max())
 
-# Ajustando os limites do eixo y de ambos os gráficos
 fig1.update_yaxes(range=[0, max_y_value * 1.1])
 fig2.update_yaxes(range=[0, max_y_value * 1.1])
 
-# Exibindo os gráficos de dispersão
-st.plotly_chart(fig1)
-st.plotly_chart(fig2)
+with col1:
+    st.plotly_chart(fig1)
+
+with col2:
+    st.plotly_chart(fig2)
 
 
 st.write("## Matriz de Correlação")
