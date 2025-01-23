@@ -27,7 +27,9 @@ def get_county_votes_df(df):
         "2020 other vote %": "other_percentage",
     })
 
-    response = requests.get("https://github.com/kjhealy/fips-codes/blob/master/state_and_county_fips_master.csv")
+    response = requests.get(
+        "https://github.com/kjhealy/fips-codes/blob/master/state_and_county_fips_master.csv"
+    )
 
     with open("./data/fips.csv", "r") as file: 
         fips_df = pd.read_csv(file)
@@ -42,7 +44,12 @@ def get_county_votes_df(df):
 
         map_df.loc[map_df["state"] == state, "state_ac"] = state_acron
 
-    result_df = map_df.merge(fips_df[["fips", "name", "state"]], left_on=["county", "state_ac"], right_on=["name", "state"], how="left")
+    result_df = map_df.merge(
+        fips_df[["fips", "name", "state"]], 
+        left_on=["county", "state_ac"], 
+        right_on=["name", "state"], 
+        how="left",
+    )
 
     result_df = result_df.drop(columns=["name"])
 
@@ -113,10 +120,14 @@ with open(file_name, "r") as file:
     geo_json_data = json.load(file)
 
 row1 = st.columns(1)
-map_plot = px.choropleth_map(data_frame=map_df, geojson=geo_json_data, color="winner party",
-                        locations=field_name, featureidkey=property_name,
-                        center = {"lat": 37.0902, "lon": -95.7129},zoom=3,
-                        color_discrete_map=color_map)
+map_plot = px.choropleth_map(
+    data_frame=map_df, 
+    geojson=geo_json_data, 
+    color="winner party",
+    locations=field_name, featureidkey=property_name,
+    center = {"lat": 37.0902, "lon": -95.7129},zoom=3,
+    color_discrete_map=color_map
+)
 row1[0].plotly_chart(map_plot, use_container_width=True)
 
 
