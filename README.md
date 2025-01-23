@@ -21,3 +21,7 @@ Project for a college subject at UFSCar which the objective of plotting a dashbo
 # Initial exploratory analysis
 
 Initial exploratory analysis of this dataset for pre-processing can be found at [here](https://colab.research.google.com/drive/1t3aXp8CIESJKGAIBAsCVxGcHz1Xco0jI?usp=sharing)
+
+# Start the dashboard
+
+To start the dashboard run ``` poetry run streamlit run main.py ```
