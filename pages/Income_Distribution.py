@@ -7,6 +7,7 @@ import pandas as pd
 import requests
 from dataset.get_dataset import get_dataframe
 
+##Visualization of this graph still needs to be fixed##
 
 def get_state_data(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -30,31 +31,7 @@ def get_state_data(df: pd.DataFrame) -> pd.DataFrame:
         else 'Other', axis=1
     )
 
-    # Aggregate data by state
-    state_data = df.groupby('state').agg(
-        mean_income=('Mean income (dollars)', 'mean'),
-        median_income=('Median income (dollars)', 'mean'),
-        total_democrat_votes=('2020 Democrat vote raw', 'sum'),
-        total_republican_votes=('2020 Republican vote raw', 'sum'),
-        total_other_votes=('2020 other vote raw', 'sum')
-    )
-
-    # Determine the most voted party for each state based on total votes
-    state_data['most_voted_party'] = state_data.apply(
-        lambda row: 'Democrat' if row['total_democrat_votes'] > row['total_republican_votes'] and row['total_democrat_votes'] > row['total_other_votes']
-        else 'Republican' if row['total_republican_votes'] > row['total_democrat_votes'] and row['total_republican_votes'] > row['total_other_votes']
-        else 'Other', axis=1
-    )
-
-    # Reset index to make 'state' a column
-    state_data = state_data.reset_index()
-
-    # Select and rename the desired columns
-    state_data = state_data[['state', 'mean_income',
-                             'median_income', 'most_voted_party']]
-    state_data = state_data.rename(columns={'state': 'state_name'})
-
-    return state_data
+    return df
 
 
 st.title("Pergunta 2")
@@ -67,12 +44,12 @@ st.markdown(
     """
 )
 df = get_dataframe()
-state_df = get_state_data(df)  # Use o dataframe agregado por estado!
+mod_df = get_state_data(df)  # Use o dataframe agregado por estado!
 
 # Violin plot para Mean Income
-fig_mean = px.violin(state_df,
-                     y="mean_income",
-                     x="state_name",
+fig_mean = px.violin(mod_df,
+                     y="Mean income (dollars)",
+                     x="state",
                      color="most_voted_party",
                      box=True,  # Mostra a caixa
                      points="all",  # Mostra todos os pontos
@@ -100,9 +77,9 @@ fig_mean.update_traces(
 st.plotly_chart(fig_mean)
 
 # Violin plot para Median Income (similar ao anterior)
-fig_median = px.violin(state_df,
-                       y="median_income",
-                       x="state_name",
+fig_median = px.violin(mod_df,
+                       y="Median income (dollars)",
+                       x="state",
                        color="most_voted_party",
                        box=True,  # Mostra a caixa
                        points="all",  # Mostra todos os pontos

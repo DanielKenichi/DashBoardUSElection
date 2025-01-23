@@ -77,15 +77,19 @@ def create_scatter_plot(df, ethnicity_type):
     return scatter_plot
 
 def create_ethnicity_vote_scatter(df, ethnicity_type, party_type):
+    republican_color = "#F2545B"
+    democrat_color = "#216681"
+    not_selected_color = "#D3D3D3"
+    
     if party_type == 'Democrats':
         party_column = 'democrat_percentage'
-        point_color = 'blue'  # Cor para Democratas
+        point_color = democrat_color  # Cor para Democratas
     elif party_type == 'Republicans':
         party_column = 'republican_percentage'
-        point_color = 'red'  # Cor para Republicanos
+        point_color = republican_color  # Cor para Republicanos
     else:
         party_column = 'other_percentage'
-        point_color = 'gray'  # Cor para outros (caso exista)
+        point_color = not_selected_color  # Cor para outros (caso exista)
     
     if ethnicity_type not in df.columns:
         st.error(f"A coluna '{ethnicity_type}' não existe no DataFrame.")
