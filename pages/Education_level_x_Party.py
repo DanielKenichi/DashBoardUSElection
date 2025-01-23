@@ -8,6 +8,7 @@ from dataset.get_dataset import get_dataframe
 st.set_page_config(
     page_title="Educação x partido de voto",
     page_icon="🎓",
+    layout="wide"
 )
 
 df = get_dataframe()
