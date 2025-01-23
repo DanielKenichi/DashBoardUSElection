@@ -66,6 +66,29 @@ def create_choropleth_map(df, geojson_data, field_name, property_name, color_map
     )
     return map_plot
 
+# Função para criar o gráfico de dispersão
+def create_scatter_plot(df, ethnicity_type):
+    # Verificar se a coluna de etnia existe no DataFrame
+    if ethnicity_type not in df.columns:
+        st.error(f"A coluna '{ethnicity_type}' não existe no DataFrame.")
+        return None
+    
+    scatter_plot = px.scatter(
+        df,
+        x="democrat_percentage",
+        y="republican_percentage",
+        color=ethnicity_type,
+        hover_name="state",
+        labels={
+            "democrat_percentage": "Porcentagem de Votos Democratas",
+            "republican_percentage": "Porcentagem de Votos Republicanos",
+            ethnicity_type: f"Porcentagem de {ethnicity_type}"  # Nome específico da etnia
+        },
+        title=f"Relação entre Votos Democratas e Republicanos por {ethnicity_type}",
+        color_continuous_scale=px.colors.sequential.Viridis,  # Escala de cores com mais contraste
+    )
+    return scatter_plot
+
 # Streamlit UI
 st.set_page_config(page_title="Ethnicity and Vote Correlation", layout="wide")  # Layout amplo
 
@@ -83,13 +106,15 @@ ethnicity_type = st.selectbox(
     "Select ethnicity", 
     ["Hispanic or Latino percentage", "NH-White percentage", "NH-Black percentage", 
      "NH-American Indian and Alaska Native percentage", "NH-Asian percentage", 
-     "NH-Native Hawaiian and Other Pacific Islander percentage", "NH-Some Other Race percentage"]
+     "NH-Native Hawaiian and Other Pacific Islander percentage", "NH-Some Other Race percentage"],
+    key="ethnicity_selectbox"  # Chave única para o selectbox de etnia
 )
 
 # Adicionar o selectbox para selecionar a exibição de estados democratas, republicanos ou ambos
 party_filter = st.selectbox(
     "Select Party",
-    ["Both", "Democrats", "Republicans"]
+    ["Both", "Democrats", "Republicans"],
+    key="party_selectbox"  # Chave única para o selectbox de partido
 )
 
 # Filtrando os estados com base no partido selecionado
@@ -100,6 +125,11 @@ if party_filter == "Democrats":
 elif party_filter == "Republicans":
     df_state_filtered = df_state_filtered[df_state_filtered['majority_party'] == 'Republicans']
 # Caso "Both", não aplicamos filtro
+
+# Adicionar as colunas de etnia ao DataFrame filtrado
+# Supondo que o DataFrame original (df) contenha as colunas de etnia por estado
+df_ethnicity = df.groupby("state")[ethnicity_type].mean().reset_index()
+df_state_filtered = pd.merge(df_state_filtered, df_ethnicity, on="state")
 
 # Calculando a correlação para a etnia selecionada e o partido em cada estado
 if party_filter == "Both":
@@ -134,9 +164,9 @@ map_plot = create_choropleth_map(df_state_filtered, geo_json_data, field_name="s
 # Exibir o mapa no Streamlit
 st.plotly_chart(map_plot, use_container_width=True)  # Usar a largura total do contêiner
 
-# Texto de conclusão
-st.write("## Conclusão")
+# Texto de explicação
 st.write("""
+**Explicação do Mapa**         
 Este mapa mostra a correlação entre a porcentagem de uma etnia específica e os votos recebidos por Democratas, Republicanos ou ambos os partidos nas eleições de 2020 nos Estados Unidos. 
 A correlação varia de **-1 a 1**, onde:
 
@@ -156,57 +186,37 @@ st.write("""
 Utilize os filtros acima para explorar como diferentes etnias se correlacionam com os votos de Democratas, Republicanos ou ambos.
 """)
 
-# Scatter plot para visualizar a relação entre etnia e votos
-st.write("## Scatter Plot: Relação entre Etnia e Votos")
-st.write("""
-O gráfico de dispersão abaixo mostra a relação direta entre a porcentagem da etnia selecionada e a porcentagem de votos para o partido escolhido (ou a média de ambos, se 'Both' for selecionado). 
-Cada ponto representa um estado, e a linha de tendência ajuda a visualizar a correlação.
+# Criar e exibir o gráfico de dispersão
+scatter_plot = create_scatter_plot(df_state_filtered, ethnicity_type)
+if scatter_plot:
+    st.plotly_chart(scatter_plot, use_container_width=True)
+
+# Texto de interpretação do gráfico de dispersão
+st.write("### Interpretação do Gráfico de Dispersão")
+
+st.write(f"""
+Este gráfico de dispersão mostra a relação entre a **porcentagem de votos democratas** (eixo X) e a **porcentagem de votos republicanos** (eixo Y) em cada estado dos Estados Unidos. Além disso, os pontos no gráfico são coloridos com base na **{ethnicity_type}**.
+
+#### Como interpretar:
+- **Eixo X (Porcentagem de Votos Democratas)**: Representa a proporção de votos recebidos pelo Partido Democrata em cada estado.
+- **Eixo Y (Porcentagem de Votos Republicanos)**: Representa a proporção de votos recebidos pelo Partido Republicano em cada estado.
+- **Cor dos Pontos**: A cor de cada ponto representa a **{ethnicity_type}** no estado correspondente. Tons mais **claros** indicam uma porcentagem **maior**, enquanto tons mais **escuros** indicam uma porcentagem **menor**. A escala de cores foi ajustada para proporcionar um maior contraste, facilitando a visualização.
+
+#### O que os pontos significam:
+- **Canto Superior Esquerdo**: Estados com alta porcentagem de votos republicanos e baixa porcentagem de votos democratas.
+- **Canto Inferior Direito**: Estados com alta porcentagem de votos democratas e baixa porcentagem de votos republicanos.
+- **Centro do Gráfico**: Estados com uma distribuição equilibrada de votos entre democratas e republicanos.
+
+#### Relação entre Etnia e Votos:
+- **Pontos Mais Claros**: Estados onde a **{ethnicity_type}** é **maior**.
+- **Pontos Mais Escuros**: Estados onde a **{ethnicity_type}** é **menor**.
+- **Tendência Positiva**: Se os pontos mais claros estiverem concentrados no canto inferior direito, isso sugere uma **correlação positiva** entre a etnia e os votos democratas.
+- **Tendência Negativa**: Se os pontos mais claros estiverem concentrados no canto superior esquerdo, isso sugere uma **correlação negativa** entre a etnia e os votos democratas.
+- **Sem Tendência Clara**: Se os pontos mais claros estiverem distribuídos uniformemente, isso sugere que **não há uma relação clara** entre a etnia e os votos para democratas ou republicanos.
+
+#### Exemplo:
+- Se a etnia selecionada for **"NH-Black percentage"** (porcentagem de negros não hispânicos):
+  - Pontos mais claros no canto inferior direito indicam que estados com uma população maior de negros tendem a votar mais no Partido Democrata.
+  - Pontos mais claros no canto superior esquerdo indicam que estados com uma população maior de negros tendem a votar mais no Partido Republicano.
+  - Pontos distribuídos uniformemente indicam que a porcentagem de negros não é um fator determinante para os votos em nenhum dos partidos.
 """)
-
-# Adicionar as colunas de porcentagem étnica ao df_state_filtered
-# Para isso, precisamos juntar as colunas de etnia do DataFrame original (df) ao df_state_filtered
-df_state_filtered = pd.merge(df_state_filtered, df[['state', ethnicity_type]], on="state", how="left")
-
-# Criar o scatter plot
-if party_filter == "Both":
-    # Para "Both", usamos a média das porcentagens de votos de Democratas e Republicanos
-    df_state_filtered['party_votes_percentage'] = (df_state_filtered['democrat_percentage'] + df_state_filtered['republican_percentage']) / 2
-else:
-    # Para partidos individuais, usamos a porcentagem de votos correspondente
-    if party_filter == "Democrats":
-        df_state_filtered['party_votes_percentage'] = df_state_filtered['democrat_percentage']
-    elif party_filter == "Republicans":
-        df_state_filtered['party_votes_percentage'] = df_state_filtered['republican_percentage']
-
-# Criar o gráfico de dispersão
-scatter_plot = px.scatter(
-    df_state_filtered,
-    x=ethnicity_type,
-    y="party_votes_percentage",
-    color="majority_party",  # Colorir os pontos pelo partido majoritário
-    trendline="ols",  # Adicionar uma linha de tendência
-    title=f"Relação entre {ethnicity_type} e Porcentagem de Votos para {party_filter}",
-    labels={
-        ethnicity_type: f"{ethnicity_type} (%)",
-        "party_votes_percentage": f"Porcentagem de Votos para {party_filter} (%)",
-        "majority_party": "Partido Majoritário"
-    },
-    size_max=10,  # Ajustar o tamanho máximo dos pontos
-    opacity=0.7  # Ajustar a transparência dos pontos
-)
-
-# Ajustar o layout do scatter plot
-scatter_plot.update_layout(
-    xaxis_title=f"{ethnicity_type} (%)",
-    yaxis_title=f"Porcentagem de Votos para {party_filter} (%)",
-    legend_title="Partido Majoritário",
-    showlegend=True
-)
-
-# Ajustar a linha de tendência para melhorar a visualização
-scatter_plot.update_traces(
-    line=dict(color="red", width=2, dash="dash")  # Linha de tendência vermelha tracejada
-)
-
-# Exibir o scatter plot
-st.plotly_chart(scatter_plot, use_container_width=True)
