@@ -13,6 +13,7 @@ dependencies = [
     "plotly (>=5.24.1,<6.0.0)",
     "kagglehub (>=0.3.6,<0.4.0)",
     "pandas (>=2.2.3,<3.0.0)",
+    "statsmodels (>=0.14.4,<0.15.0)",
 ]
 
 
