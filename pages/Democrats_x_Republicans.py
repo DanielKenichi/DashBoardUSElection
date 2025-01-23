@@ -75,6 +75,7 @@ def determine_color(map_df):
 
 st.set_page_config(
     page_title="Democrats x Republicans",
+    layout="wide"
 )
 
 st.markdown(
