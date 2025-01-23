@@ -19,6 +19,15 @@ st.set_page_config(
     page_title="Income x Party",
 )
 
+st.markdown(
+    """
+    # Pergunta 3
+    - Existe correlação entre concentração de renda e o partido de voto por estado?
+        - Hipótese1 : Existe uma correlação entre concentração de renda e partido de voto
+        - Hipótese2:  Não Existe uma correlação entre concentração de renda e partido de voto
+    """
+)
+
 st.write("# Income x Party")
 
 df = get_dataframe()

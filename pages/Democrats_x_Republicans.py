@@ -6,6 +6,8 @@ import json
 import os
 from dataset.get_dataset import get_dataframe
 
+processed_dfs = dict()
+
 def get_state_votes_df(df):
     state_votes_df = df.groupby("state")[["2020 Democrat vote raw", "2020 Republican vote raw", "2020 other vote raw"]].sum()
 
@@ -75,6 +77,15 @@ st.set_page_config(
     page_title="Democrats x Republicans",
 )
 
+st.markdown(
+    """
+    # Pergunta 1
+    - Quais estados tiveram maioria republicana e Quais democrata?
+        - Hipótese1 : A maioria dos estados teve maioria republicana
+        - Hipótese2:  A maioria dos estados teve maioria democrata
+    """
+)
+
 st.write("# Democrats x Republicans")
 
 party_selector, state_or_county = st.columns(2)
@@ -125,7 +136,8 @@ map_plot = px.choropleth_map(
     geojson=geo_json_data, 
     color="winner party",
     locations=field_name, featureidkey=property_name,
-    center = {"lat": 37.0902, "lon": -95.7129},zoom=3,
+    center = {"lat": 37.0902, "lon": -95.7129},
+    zoom=2.5,
     color_discrete_map=color_map
 )
 row1[0].plotly_chart(map_plot, use_container_width=True)
