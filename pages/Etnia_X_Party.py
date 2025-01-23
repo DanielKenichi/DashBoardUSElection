@@ -4,6 +4,7 @@ import pandas as pd
 import requests
 from dataset.get_dataset import get_dataframe
 
+
 def get_state_votes_df(df):
     state_votes_df = df.groupby("state")[["2020 Democrat vote raw", "2020 Republican vote raw", "2020 other vote raw"]].sum()
 
@@ -91,6 +92,17 @@ def create_scatter_plot(df, ethnicity_type):
 
 # Streamlit UI
 st.set_page_config(page_title="Ethnicity and Vote Correlation", layout="wide")  # Layout amplo
+
+
+st.markdown(
+    """
+    # Pergunta 5
+    - Existe correlação entre etnia e o partido de voto por estado?
+        - Hipótese1 : Existe uma correlação entre etnia e partido de voto
+        - Hipótese2: Não Existe uma correlação entre etnia de voto
+
+    """
+)
 
 st.write("# Correlation Between Ethnicity and Vote by State")
 
@@ -214,9 +226,10 @@ Este gráfico de dispersão mostra a relação entre a **porcentagem de votos de
 - **Tendência Negativa**: Se os pontos mais claros estiverem concentrados no canto superior esquerdo, isso sugere uma **correlação negativa** entre a etnia e os votos democratas.
 - **Sem Tendência Clara**: Se os pontos mais claros estiverem distribuídos uniformemente, isso sugere que **não há uma relação clara** entre a etnia e os votos para democratas ou republicanos.
 
-#### Exemplo:
-- Se a etnia selecionada for **"NH-Black percentage"** (porcentagem de negros não hispânicos):
-  - Pontos mais claros no canto inferior direito indicam que estados com uma população maior de negros tendem a votar mais no Partido Democrata.
-  - Pontos mais claros no canto superior esquerdo indicam que estados com uma população maior de negros tendem a votar mais no Partido Republicano.
-  - Pontos distribuídos uniformemente indicam que a porcentagem de negros não é um fator determinante para os votos em nenhum dos partidos.
+#### Dependendo da Etnia:
+A correlação entre uma etnia específica e os votos pode variar significativamente. Algumas etnias podem mostrar uma forte tendência de votar mais em um partido, enquanto outras podem não apresentar uma relação clara. Por exemplo:
+- **NH-White percentage**: Em geral, a porcentagem de brancos não hispânicos (**NH-White percentage**) não apresenta uma correlação forte com os votos para democratas ou republicanos. Os pontos tendem a se distribuir de forma mais uniforme ao longo do gráfico, indicando que essa etnia não é um fator determinante para o voto.
+- **NH-Black percentage**: Já a porcentagem de negros não hispânicos (**NH-Black percentage**) tende a mostrar uma **correlação positiva com os votos democratas**. Estados com uma população maior de negros tendem a votar mais no Partido Democrata, refletindo uma relação mais forte entre essa etnia e o voto.
+
+Utilize os filtros acima para explorar como diferentes etnias se correlacionam com os votos de Democratas, Republicanos ou ambos.
 """)
