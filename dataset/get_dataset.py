@@ -1,7 +1,7 @@
 import kagglehub
 import pandas as pd
 import os
-
+import re
 def get_dataframe():
     path = kagglehub.dataset_download("essarabi/ultimate-us-election-dataset")
     print("Path to dataset files:", path)
@@ -30,8 +30,14 @@ def get_dataframe():
         df[col] = df[col].astype(str).str.replace(",", "", regex=False)
         df[col] = pd.to_numeric(df[col], errors="coerce").astype("Int64")
     
-    print(df.head())
+    df["state"] = df["state"].apply(format_state_name)
+
     return df
 
+def format_state_name(state_name):
+    if state_name == "DistrictofColumbia":
+        return "District of Columbia"
+
+    return re.sub(r'([a-z])([A-Z])', r'\1 \2', state_name)
 
 get_dataframe()

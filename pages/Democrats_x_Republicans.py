@@ -1,10 +1,9 @@
 import streamlit as st
 import plotly.express as px
 import pandas as pd
-import kagglehub
+import requests
 import json
 import os
-import re
 from dataset.get_dataset import get_dataframe
 
 def get_state_votes_df(df):
@@ -20,7 +19,30 @@ def get_state_votes_df(df):
 
     return state_votes_df
 
-def determine_color(states_df):
+def get_county_votes_df(df):
+    map_df = df.copy()
+    map_df = map_df.rename(columns={
+        "2020 Republican vote %": "republican_percentage", 
+        "2020 Democrat vote %": "democrat_percentage",
+        "2020 other vote %": "other_percentage",
+    })
+
+    response = requests.get("https://github.com/kjhealy/fips-codes/blob/master/state_and_county_fips_master.csv")
+
+    with open("./data/fips.csv", "r") as file: 
+        fips_df = pd.read_csv(file)
+
+    fips_df = fips_df[~fips_df["name"].str.isupper()]
+
+    map_df = map_df.merge(
+        fips_df[["name", "fips"]], left_on="county", right_on="name", how="left",
+    ).drop(columns=["name"])
+
+    map_df["fips"] = map_df["fips"].apply(lambda x: str(x).zfill(5))
+
+    return map_df
+
+def determine_color(map_df):
     def assign_color(row):
         if row["republican_percentage"] > row["democrat_percentage"] and row["republican_percentage"] > row["other_percentage"]:
             return "Republicans"
@@ -29,14 +51,8 @@ def determine_color(states_df):
         else:
             return "Others"
     
-    states_df["winner party"] = states_df.apply(assign_color, axis=1)
-    return states_df
-
-def format_state_name(state_name):
-    if state_name == "DistrictofColumbia":
-        return "District of Columbia"
-
-    return re.sub(r'([a-z])([A-Z])', r'\1 \2', state_name)
+    map_df["winner party"] = map_df.apply(assign_color, axis=1)
+    return map_df
 
 st.set_page_config(
     page_title="Democrats x Republicans",
@@ -44,9 +60,14 @@ st.set_page_config(
 
 st.write("# Democrats x Republicans")
 
-party_to_show = st.selectbox("",("Both", "Democrats", "Republicans"))
+party_selector, state_or_county = st.columns(2)
 
 df = get_dataframe()
+
+with party_selector:
+    party_to_show = st.selectbox("",["Both", "Democrats", "Republicans"])
+with state_or_county:
+    city_or_state = st.selectbox("", ["by state", "by county"])
 
 republican_color = "#F2545B"
 democrat_color = "#216681"
@@ -60,24 +81,36 @@ else:
    color_map = {"Republicans": republican_color,"Democrats": not_selected_color}
 
 #preparing df for the map plot
-states_df = get_state_votes_df(df)
-states_df = determine_color(states_df)
-states_df["state"] = states_df["state"].apply(format_state_name)
+if city_or_state == "by state":
+    url = "https://raw.githubusercontent.com/PublicaMundi/MappingAPI/master/data/geojson/us-states.json"
+    file_name = "us-states.json"
+    field_name = "state"
+    property_name = "properties.name"
+    map_df = get_state_votes_df(df)
+else: #by county
+    url = "https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json"
+    file_name = "us-counties.json"
+    field_name = "fips"
+    property_name = "id"
+    map_df = get_county_votes_df(df)
 
-path = kagglehub.dataset_download("pompelmo/usa-states-geojson")
-path = os.path.join(path, "us-states.json")
-with open(path, "r") as file:
+map_df = determine_color(map_df)
+
+response = requests.get(url)
+with open(file_name, "w", encoding="utf-8") as file:
+    file.write(response.text)
+with open(file_name, "r") as file:
     geo_json_data = json.load(file)
 
 row1 = st.columns(1)
-map_plot = px.choropleth_map(data_frame=states_df, geojson=geo_json_data, color="winner party",
-                        locations="state", featureidkey="properties.name",
+map_plot = px.choropleth_map(data_frame=map_df, geojson=geo_json_data, color="winner party",
+                        locations=field_name, featureidkey=property_name,
                         center = {"lat": 37.0902, "lon": -95.7129},zoom=3,
                         color_discrete_map=color_map)
 row1[0].plotly_chart(map_plot)
 
 #preparing df for the barplot
-counts = states_df["winner party"].value_counts()
+counts = map_df["winner party"].value_counts()
 counts_df = pd.DataFrame(counts).transpose()
 counts_df = counts_df.melt(var_name="Party", value_name="Count")
 
@@ -94,11 +127,13 @@ bar_plot = px.bar(
     text="Count"
 )
 
+location = city_or_state.split(" ")[1]
+
 bar_plot.update_layout(
-    title="Count of states",
+    title=f"Count of {location}",
     xaxis_title="Party",
     yaxis_title="Count",
-    yaxis_range=[0, 50],
+    yaxis_range=[0, len(map_df)],
     showlegend=False
 )
 bar_plot.update_traces(textposition='outside', textfont=dict(size=16))
