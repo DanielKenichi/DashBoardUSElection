@@ -13,7 +13,7 @@ def get_dataframe():
 
     df = df.drop("Unnamed: 0", axis=1)
 
-    percentage_columns = [
+    percentages_as_strings = [
         'Population with less than 9th grade education',
         'Population with 9th to 12th grade education, no diploma',
         'High School graduate and equivalent',
@@ -23,13 +23,23 @@ def get_dataframe():
         'Graduate or professional degree'
     ]
 
-    for col in percentage_columns:
-        df[col] = df[col].astype(str).str.rstrip("%").astype("float64") / 100
+    df[percentages_as_strings] = df[percentages_as_strings].apply(lambda x: x.str.replace('%', '').astype('float64')/100)
 
-    for col in ["Mean income (dollars)", "Median income (dollars)"]:
-        df[col] = df[col].astype(str).str.replace(",", "", regex=False)
-        df[col] = pd.to_numeric(df[col], errors="coerce").astype("Int64")
-    
+    df.rename(columns={'Mean income (dollars)': 'x'}, inplace=True)
+    df['Mean income (dollars)'] = df['x'].apply(lambda x: x.replace('$', '').replace(',', '')).astype(int)
+    df.drop(columns=['x'], inplace=True)
+
+    df.rename(columns={'Median income (dollars)': 'x'}, inplace=True)
+    df['Median income (dollars)'] = df['x'].apply(
+        lambda x: int(x.replace('$', '').replace(',', '')) if x.replace('$', '').replace(',', '').lstrip('-').isdigit() else None
+    )
+    df.drop(columns=['x'], inplace=True)
+
+    out_of_scale_percentages = df.filter(regex='Percentage|%').columns
+
+    df[out_of_scale_percentages] = df[out_of_scale_percentages].apply(lambda x: x / 100 if x.max() > 1 else x)
+    df[out_of_scale_percentages].head()
+
     df["state"] = df["state"].apply(format_state_name)
 
     return df
