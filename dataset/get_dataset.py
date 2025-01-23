@@ -35,7 +35,7 @@ def get_dataframe():
     )
     df.drop(columns=['x'], inplace=True)
 
-    out_of_scale_percentages = df.filter(regex='Percentage|%').columns
+    out_of_scale_percentages = df.filter(regex='Percentage|percentage|%').columns
 
     df[out_of_scale_percentages] = df[out_of_scale_percentages].apply(lambda x: x / 100 if x.max() > 1 else x)
     df[out_of_scale_percentages].head()
