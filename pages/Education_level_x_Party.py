@@ -38,6 +38,11 @@ education_level = st.selectbox(
     format_func=lambda x: education_level_options[x],
 )
 
+plot_size = st.selectbox(
+    'Tamanho do ponto',
+    ['Total Population', 'Hispanic or Latino percentage', 'Mean income (dollars)']
+)
+
 col1, col2 = st.columns([1, 1])
 
 df['republican_votes'] = df['2020 Republican vote %'] * df['Total Population']
@@ -49,7 +54,7 @@ fig1 = px.scatter(
     x=education_level,
     y='2020 Republican vote %',
     color='state',
-    size='Total Population',
+    size=plot_size,
     hover_name='county',
     size_max=60,
     title=f'Porcentagem de votos republicanos pela porcentagem da população no nível {education_level_options[education_level]}',
@@ -65,7 +70,7 @@ fig2 = px.scatter(
     x=education_level,
     y='2020 Democrat vote %',
     color='state',
-    size='Total Population',
+    size=plot_size,
     hover_name='county',
     size_max=60,
     title=f'Porcentagem de votos democratas pela porcentagem da população no nível {education_level_options[education_level]}',
