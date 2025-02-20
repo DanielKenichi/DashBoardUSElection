@@ -7,7 +7,8 @@ import pandas as pd
 from dataset.get_dataset import get_dataframe
 from helpers.pdf_plot import PDFPlot
 
-##Visualization of this graph still needs to be fixed##
+## Visualization of this graph still needs to be fixed##
+
 
 def get_state_data(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -32,6 +33,7 @@ def get_state_data(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     return df
+
 
 st.set_page_config(page_title="Income Distribution", layout="wide")
 
@@ -77,6 +79,12 @@ fig_mean.update_traces(
 
 st.plotly_chart(fig_mean)
 
+'''
+    **Imagem:** O gráfico de Velas (ou Candlestick) apresenta a média de 
+renda por estado, levando em consideração o partido ganhador
+ (Democrata ou Republicano) de cada condado.
+'''
+
 # Violin plot para Median Income (similar ao anterior)
 fig_median = px.violin(mod_df,
                        y="Median income (dollars)",
@@ -109,23 +117,35 @@ fig_median.update_traces(
 
 st.plotly_chart(fig_median)
 
+'''
+**Imagem:** O gráfico de Velas (ou Candlestick em inglês)
+apresenta a mediana de renda por estado, levando
+ em consideração o partido ganhador (Democrata ou Republicano)
+   de cada condado.
+
+'''
+
 
 '''
 # Concentração de renda.
 '''
 
 # Plota um histograma da renda média
-fig, ax = plt.subplots(figsize=(14, 8))     
-ax.hist(mod_df['Mean income (dollars)'], bins=50, color='blue', alpha=0.7, density=True)
+fig, ax = plt.subplots(figsize=(14, 8))
+ax.hist(mod_df['Mean income (dollars)'], bins=50,
+        color='blue', alpha=0.7, density=True)
 ax.set_title('Histograma da Renda Média', fontsize=16)
 ax.set_xlabel('Renda Média (dólares)', fontsize=14)
 ax.set_ylabel('Densidade', fontsize=14)
 st.pyplot(fig)
 
+'''
+**Imagem:** Histograma de renda média dos EUA.
+'''
 
 
-
-concetration_percentage = st.slider("Digite o valor da porcentagem desejada.", min_value=0.0, max_value=1.0, value=0.05, step=0.01, format="%.2f")
+concetration_percentage = st.slider("Digite o valor da porcentagem desejada.",
+                                    min_value=0.0, max_value=1.0, value=0.05, step=0.01, format="%.2f")
 
 [pdf, x] = PDFPlot().plot(
     desired_percentile=concetration_percentage,
@@ -134,7 +154,9 @@ concetration_percentage = st.slider("Digite o valor da porcentagem desejada.", m
 
 st.pyplot(pdf)
 
-st.markdown(f'> **Imagem**: Gráfico de área que indica a probabilidade de {(concetration_percentage * 100):.0f}% da população ganhar até US$ {x:.2f}.')
+
+st.markdown(
+    f'> **Imagem**: Gráfico de área que indica a probabilidade de {(concetration_percentage * 100):.0f}% da população ganhar até US$ {x:.2f}.')
 
 col1, col2 = st.columns([1, 1])
 
@@ -166,3 +188,21 @@ st.pyplot(pdf)
 st.markdown(
     f'> **Imagem**: Gráfico de área que indica a probabilidade de {(concetration_percentage * 100):.0f}% da população de {selected_state_pdf} ganhar até US$ {x:.2f}.'
 )
+
+
+'''
+## Conclusão
+
+- Em alguns estados há uma disparidade muito elevada na quantidade de condados que votaram nos republicanos e democratas.  Isso causa um desbalanceamento na comparação de renda por partido. Ex: Hawaii (só tem condados que votaram nos democratas) e Kentucky (que 120 condados são Republicanos e apenas 2 são Democratas).
+Essa característica dificulta a análise de relação entre renda e partido no estado, já que a quantidade de dados é desbalanceada.
+
+- Alguns estados como Califórnia, Colorado, Maryland,
+New Mexico, New York, seus condados com média e mediana mais altas para renda votam nos democratas.
+
+
+- Em outros estados como Alabama e Mississipi, a maioria dos condados com média e mediana mais altas para renda votam nos republicanos.
+
+- No geral, em 20 estados a renda mais alta é a dos republicanos, contra 26 estados onde a renda mais alta é a dos democratas.
+4 estados todos os condados votaram nos democratas e 1 estado todos os condados votaram nos republicanos.
+Porém, não dá para se concluir com clareza se no geral, os estados com mais concentração de renda tendem a votar majoritariamente no partido republicano ou democrata, já que a comparação muitos estados é afetada pela diferença na quantidade de dados. 
+'''
