@@ -9,28 +9,33 @@ class PDFPlot:
         self.mean = mean
         self.std_deviation = std_deviation
 
-    def plot(self, desired_percentile: float) -> plt.Figure:
-        probList = []
-        x = np.arange(0, self.mean+3 * self.std_deviation, 0.1)
+    def plot(self, desired_percentile: float, real_data: np.array) -> plt.Figure:
+        # Cálculo do histograma com os dados reais
+        counts, bin_edges = np.histogram(real_data, bins=50, density=True)
+        x = (bin_edges[:-1] + bin_edges[1:]) / 2  # centros dos bins
+        probList = counts
 
-        for xi in x:
-            probList.append(norm.pdf(xi, loc=self.mean, scale=self.std_deviation))
+        # Cria uma figura e um único eixo
+        fig, ax = plt.subplots(figsize=(14, 8))
 
-        fig = plt.figure(figsize=(24,8))
+        ax.plot(x, probList, c='green', linewidth=1.5, linestyle=':')
+        ax.fill_between(x, probList, facecolor='blue', alpha=0.3)
 
-        plt.subplot(1, 2, 1)
-        plt.plot(x,probList,c='green',linewidth=1.5,linestyle=':')
-        plt.fill_between(x,probList, facecolor='blue', alpha=0.3)
+        # Cálculo do percentil utilizando os dados reais
+        x_percent = np.percentile(real_data, desired_percentile * 100)
 
-        # Perceint Point Function, inversa da Cumulative Distribution Function
-        x_percent = norm.ppf(desired_percentile, loc=self.mean, scale=self.std_deviation)
+        # Preenche a região até o percentil
+        mask = x < x_percent
+        ax.fill_between(x[mask], np.array(probList)[mask], facecolor='darkred')
 
-        plt.fill_between(np.arange(0,x_percent,0.1), probList[0:len(np.arange(0,x_percent,0.1)+1)], facecolor='darkred')
-        plt.xlabel('Valor')
-        plt.ylabel('Função Densidade de Probabilidade')
-        plt.title(f'PDF, $N(\mu={self.mean}, \sigma={self.std_deviation})$', fontsize=14, weight='bold')
-        plt.axvline(x_percent,linewidth=1,linestyle='-.',color='darkred')
+        ax.set_xlabel('Valor', fontsize=22)
+        ax.set_ylabel('Densidade de Probabilidade', fontsize=22)
+        ax.set_title(f'PDF, $N(\\mu={self.mean}, \\sigma={self.std_deviation}) \quad X = {x_percent:.2f}$', fontsize=14, weight='bold')
+        ax.axvline(x_percent, linewidth=1, linestyle='-.', color='darkred')
 
-        plt.text(x_percent + 2, 0.0005, f"X = {'{:.2f}'.format(x_percent)}", fontsize=12, color='black')
+        # Posiciona o texto relativo ao eixo (usando coordenadas de axes)
+        ax.text(0.95, 0.85, f"X = {x_percent:.2f}", transform=ax.transAxes,
+                fontsize=12, color='black', horizontalalignment='right')
 
+        fig.tight_layout()
         return fig

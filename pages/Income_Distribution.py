@@ -34,6 +34,7 @@ def get_state_data(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+st.set_page_config(page_title="Income Distribution", layout="wide")
 
 st.title("Pergunta 2")
 
@@ -118,5 +119,8 @@ st.plotly_chart(fig_median)
 
 concetration_percentage = st.number_input("Digite o valor de alpha", min_value=0.0, max_value=1.0, value=0.05, step=0.01)
 
-pdf = PDFPlot(n=1000, mean=100, std_deviation=15).plot(desired_percentile=concetration_percentage)
+pdf = PDFPlot(n=1000, mean=100, std_deviation=15).plot(
+    desired_percentile=concetration_percentage,
+    real_data=mod_df['Mean income (dollars)'].values
+)
 st.pyplot(pdf)
