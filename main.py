@@ -3,10 +3,10 @@ import streamlit as st
 from dataset.get_dataset import get_dataframe
 
 st.set_page_config(
-    page_title="Etapa 2 PVD",
+    page_title="Etapa 3 PVD",
 )
 
-st.write("# Etapa 2 - PVD")
+st.write("# Etapa 3 - PVD")
 
 st.sidebar.success("Selecione a hipótese a ser exibida")
 
