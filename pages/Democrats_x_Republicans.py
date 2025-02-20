@@ -191,7 +191,7 @@ row2[0].plotly_chart(bar_plot, use_container_width=True)
 row3 = st.columns(1)
 
 opacity = 0.75
-bar_size = 0.01
+bar_size = 0.05
 
 hist1 = go.Histogram(
     x=hist_df["democrat_percentage"],
