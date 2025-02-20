@@ -5,6 +5,7 @@ import plotly.express as px
 import numpy as np
 import pandas as pd
 from dataset.get_dataset import get_dataframe
+from helpers.cdf_plot import CDFPlot
 from helpers.pdf_plot import PDFPlot
 
 ## Visualization of this graph still needs to be fixed##
@@ -49,6 +50,83 @@ st.markdown(
 df = get_dataframe()
 mod_df = get_state_data(df)  # Use o dataframe agregado por estado!
 
+# Violin plot para Mean Income
+fig_mean = px.violin(mod_df,
+                     y="Mean income (dollars)",
+                     x="state",
+                     color="most_voted_party",
+                     box=True,  # Mostra a caixa
+                     points="all",  # Mostra todos os pontos
+                     color_discrete_map={'Democrat': 'blue',
+                                         'Republican': 'red', 'Other': 'gray'},
+                     )
+fig_mean.update_traces(
+    jitter=0.7,  # Adiciona jitter horizontal aos pontos
+    pointpos=0,  # Posiciona os pontos no centro
+    marker=dict(size=7, opacity=0.7),  # Melhora a visualização dos pontos
+)
+fig_mean.update_layout(
+    title_text="Mean Income by State",
+    yaxis_title="Mean Income (dollars)",
+    xaxis_title="State"
+)
+
+fig_mean.update_traces(
+    jitter=0.7,
+    pointpos=0,
+    marker=dict(size=7, opacity=0.7),
+    line_width=2.5  # Adicione esta linha para aumentar a espessura da linha da caixa
+)
+
+st.plotly_chart(fig_mean)
+
+'''
+    **Imagem:** O gráfico de Velas (ou Candlestick) apresenta a média de 
+renda por estado, levando em consideração o partido ganhador
+ (Democrata ou Republicano) de cada condado.
+'''
+
+# Violin plot para Median Income (similar ao anterior)
+fig_median = px.violin(mod_df,
+                       y="Median income (dollars)",
+                       x="state",
+                       color="most_voted_party",
+                       box=True,  # Mostra a caixa
+                       points="all",  # Mostra todos os pontos
+                       color_discrete_map={'Democrat': 'blue',
+                                           'Republican': 'red', 'Other': 'gray'},
+                       )
+
+fig_median.update_traces(
+    jitter=0.7,  # Adiciona jitter horizontal aos pontos
+    pointpos=0,  # Posiciona os pontos no centro
+    marker=dict(size=7, opacity=0.7),  # Melhora a visualização dos pontos
+)
+
+fig_median.update_layout(
+    title_text="Median Income by State",
+    yaxis_title="Median Income (dollars)",
+    xaxis_title="State",
+)
+
+fig_median.update_traces(
+    jitter=0.7,
+    pointpos=0,
+    marker=dict(size=7, opacity=0.7),
+    line_width=2.5  # Adicione esta linha para aumentar a espessura da linha da caixa
+)
+
+st.plotly_chart(fig_median)
+
+'''
+**Imagem:** O gráfico de Velas (ou Candlestick em inglês)
+apresenta a mediana de renda por estado, levando
+ em consideração o partido ganhador (Democrata ou Republicano)
+   de cada condado.
+
+'''
+
+
 col1, col2 = st.columns([1, 1])
 
 with col1:
@@ -69,6 +147,7 @@ fig_mean = px.violin(df_state_violin,
                      color_discrete_map={'Democrat': 'blue',
                                          'Republican': 'red', 'Other': 'gray'},
                      )
+
 fig_mean.update_traces(
     jitter=0.7,  # Adiciona jitter horizontal aos pontos
     pointpos=0,  # Posiciona os pontos no centro
@@ -156,13 +235,23 @@ st.pyplot(fig)
 concetration_percentage = st.slider("Digite o valor da porcentagem desejada.",
                                     min_value=0.0, max_value=1.0, value=0.05, step=0.01, format="%.2f")
 
-[pdf, x] = PDFPlot().plot(
-    desired_percentile=concetration_percentage,
-    real_data=mod_df['Mean income (dollars)'].values,
-)
+col_pdf, col_cdf = st.columns([1, 1])
 
-st.pyplot(pdf)
 
+with col_pdf:
+    [pdf, x] = PDFPlot().plot(
+        desired_percentile=concetration_percentage,
+        real_data=mod_df['Mean income (dollars)'].values,
+    )
+    st.pyplot(pdf)
+
+with col_cdf:
+    [cdf, x_2] = CDFPlot().plot(
+        desired_percentile=concetration_percentage,
+        real_data=mod_df['Mean income (dollars)'].values,
+    )
+
+    st.pyplot(cdf)
 
 st.markdown(
     f'> **Imagem**: Gráfico de área que indica a probabilidade de {(concetration_percentage * 100):.0f}% da população ganhar até US$ {x:.2f}.')
