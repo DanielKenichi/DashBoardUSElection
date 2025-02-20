@@ -50,6 +50,83 @@ st.markdown(
 df = get_dataframe()
 mod_df = get_state_data(df)  # Use o dataframe agregado por estado!
 
+# Violin plot para Mean Income
+fig_mean = px.violin(mod_df,
+                     y="Mean income (dollars)",
+                     x="state",
+                     color="most_voted_party",
+                     box=True,  # Mostra a caixa
+                     points="all",  # Mostra todos os pontos
+                     color_discrete_map={'Democrat': 'blue',
+                                         'Republican': 'red', 'Other': 'gray'},
+                     )
+fig_mean.update_traces(
+    jitter=0.7,  # Adiciona jitter horizontal aos pontos
+    pointpos=0,  # Posiciona os pontos no centro
+    marker=dict(size=7, opacity=0.7),  # Melhora a visualização dos pontos
+)
+fig_mean.update_layout(
+    title_text="Mean Income by State",
+    yaxis_title="Mean Income (dollars)",
+    xaxis_title="State"
+)
+
+fig_mean.update_traces(
+    jitter=0.7,
+    pointpos=0,
+    marker=dict(size=7, opacity=0.7),
+    line_width=2.5  # Adicione esta linha para aumentar a espessura da linha da caixa
+)
+
+st.plotly_chart(fig_mean)
+
+'''
+    **Imagem:** O gráfico de Velas (ou Candlestick) apresenta a média de 
+renda por estado, levando em consideração o partido ganhador
+ (Democrata ou Republicano) de cada condado.
+'''
+
+# Violin plot para Median Income (similar ao anterior)
+fig_median = px.violin(mod_df,
+                       y="Median income (dollars)",
+                       x="state",
+                       color="most_voted_party",
+                       box=True,  # Mostra a caixa
+                       points="all",  # Mostra todos os pontos
+                       color_discrete_map={'Democrat': 'blue',
+                                           'Republican': 'red', 'Other': 'gray'},
+                       )
+
+fig_median.update_traces(
+    jitter=0.7,  # Adiciona jitter horizontal aos pontos
+    pointpos=0,  # Posiciona os pontos no centro
+    marker=dict(size=7, opacity=0.7),  # Melhora a visualização dos pontos
+)
+
+fig_median.update_layout(
+    title_text="Median Income by State",
+    yaxis_title="Median Income (dollars)",
+    xaxis_title="State",
+)
+
+fig_median.update_traces(
+    jitter=0.7,
+    pointpos=0,
+    marker=dict(size=7, opacity=0.7),
+    line_width=2.5  # Adicione esta linha para aumentar a espessura da linha da caixa
+)
+
+st.plotly_chart(fig_median)
+
+'''
+**Imagem:** O gráfico de Velas (ou Candlestick em inglês)
+apresenta a mediana de renda por estado, levando
+ em consideração o partido ganhador (Democrata ou Republicano)
+   de cada condado.
+
+'''
+
+
 col1, col2 = st.columns([1, 1])
 
 with col1:
@@ -70,6 +147,7 @@ fig_mean = px.violin(df_state_violin,
                      color_discrete_map={'Democrat': 'blue',
                                          'Republican': 'red', 'Other': 'gray'},
                      )
+
 fig_mean.update_traces(
     jitter=0.7,  # Adiciona jitter horizontal aos pontos
     pointpos=0,  # Posiciona os pontos no centro
