@@ -3,6 +3,7 @@ import plotly.express as px
 import plotly.figure_factory as ff
 
 from dataset.get_dataset import get_dataframe
+from helpers.pdf_plot import PDFPlot
 
 # Configuração da UI
 st.set_page_config(
@@ -135,3 +136,57 @@ fig3.update_layout(
 
 # Exibindo o mapa de calor
 st.plotly_chart(fig3)
+
+
+'''
+# Histograma dos níveis de educação por estado
+'''
+import pandas as pd
+import plotly.express as px
+
+# Widget para selecionar o estado para o gráfico de barras
+selected_state_bar = st.selectbox(
+    "Selecione o estado para o gráfico de níveis de educação",
+    sorted(df["state"].unique())
+)
+
+# Filtra o DataFrame para o estado selecionado
+df_state_bar = df[df["state"] == selected_state_bar]
+
+# Calcula a média de cada nível de educação para o estado selecionado
+edu_means = {key: df_state_bar[key].mean() for key in education_level_options.keys()}
+
+# Cria um DataFrame a partir do dicionário, usando os rótulos customizados
+edu_df = pd.DataFrame({
+    "Nível de Educação": [education_level_options[key] for key in education_level_options.keys()],
+    "Média (%)": [edu_means[key] for key in education_level_options.keys()]
+})
+
+rep_total = df_state_bar['2020 Republican vote raw'].sum()
+dem_total = df_state_bar['2020 Democrat vote raw'].sum()
+most_voted_party = '🫏 republicana' if rep_total > dem_total else '🐘 democrata'
+
+fig_bar = px.bar(
+    edu_df,
+    x="Nível de Educação",
+    y="Média (%)",
+    title=f"Níveis de Educação em {selected_state_bar}",
+    template="plotly_dark"
+)
+
+fig_bar.update_layout(
+    xaxis_title="Nível de Educação",
+    yaxis_title="Média (%)",
+    xaxis_tickangle=-45
+)
+
+st.markdown(f'> {selected_state_bar} é de maioria {most_voted_party}.')
+
+st.plotly_chart(fig_bar)
+
+legenda = ", ".join(
+    f"{education_level_options[key]}: {edu_means[key]:.2f}%" 
+    for key in education_level_options.keys()
+)
+
+st.markdown(f'> **Imagem**: Gráfico de barras que mostra a média de cada nível de educação em {selected_state_bar}. Os dados exibidos, da esquerda para a direita, são: {legenda}.')

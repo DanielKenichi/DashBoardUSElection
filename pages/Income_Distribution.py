@@ -1,10 +1,9 @@
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
-import seaborn as sns
 import streamlit as st
 import plotly.express as px
+import numpy as np
 import pandas as pd
-import requests
 from dataset.get_dataset import get_dataframe
 from helpers.pdf_plot import PDFPlot
 
@@ -112,10 +111,19 @@ st.plotly_chart(fig_median)
 
 
 '''
-# Concentração de renda por estado.
-
-...
+# Concentração de renda.
 '''
+
+# Plota um histograma da renda média
+fig, ax = plt.subplots(figsize=(14, 8))     
+ax.hist(mod_df['Mean income (dollars)'], bins=50, color='blue', alpha=0.7, density=True)
+ax.set_title('Histograma da Renda Média', fontsize=16)
+ax.set_xlabel('Renda Média (dólares)', fontsize=14)
+ax.set_ylabel('Densidade', fontsize=14)
+st.pyplot(fig)
+
+
+
 
 concetration_percentage = st.slider("Digite o valor da porcentagem desejada.", min_value=0.0, max_value=1.0, value=0.05, step=0.01, format="%.2f")
 
@@ -127,3 +135,34 @@ concetration_percentage = st.slider("Digite o valor da porcentagem desejada.", m
 st.pyplot(pdf)
 
 st.markdown(f'> **Imagem**: Gráfico de área que indica a probabilidade de {(concetration_percentage * 100):.0f}% da população ganhar até US$ {x:.2f}.')
+
+col1, col2 = st.columns([1, 1])
+
+with col1:
+    selected_state_pdf = st.selectbox(
+        "Selecione o estado para o PDF de renda",
+        sorted(df["state"].unique())
+    )
+
+with col2:
+    df_state_pdf = mod_df[mod_df["state"] == selected_state_pdf]
+
+    concetration_percentage = st.slider(
+        "Digite o valor da porcentagem desejada (por estado).",
+        min_value=0.0,
+        max_value=1.0,
+        value=0.05,
+        step=0.01,
+        format="%.2f"
+    )
+
+[pdf, x] = PDFPlot().plot(
+    desired_percentile=concetration_percentage,
+    real_data=np.sort(df_state_pdf['Mean income (dollars)'].values),
+)
+
+st.pyplot(pdf)
+
+st.markdown(
+    f'> **Imagem**: Gráfico de área que indica a probabilidade de {(concetration_percentage * 100):.0f}% da população de {selected_state_pdf} ganhar até US$ {x:.2f}.'
+)
