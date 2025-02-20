@@ -1,6 +1,9 @@
 import streamlit as st
 import plotly.express as px
+import plotly.graph_objects as go
 import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
 import requests
 import json
 import os
@@ -116,12 +119,14 @@ if city_or_state == "by state":
     field_name = "state"
     property_name = "properties.name"
     map_df = get_state_votes_df(df)
+    hist_df = get_state_votes_df(df)
 else: #by county
     url = "https://raw.githubusercontent.com/plotly/datasets/master/geojson-counties-fips.json"
     file_name = "us-counties.json"
     field_name = "fips"
     property_name = "id"
     map_df = get_county_votes_df(df)
+    hist_df = get_county_votes_df(df)
 
 map_df = determine_color(map_df)
 
@@ -173,3 +178,67 @@ bar_plot.update_layout(
 bar_plot.update_traces(textposition='outside', textfont=dict(size=16))
 
 row2[0].plotly_chart(bar_plot, use_container_width=True)
+
+row3 = st.columns(1)
+
+opacity = 0.75
+bar_size = 0.01
+
+hist1 = go.Histogram(
+    x=hist_df["democrat_percentage"],
+    opacity=opacity,
+    marker=dict(color=democrat_color),
+    name='Democrats',
+    xbins=dict(size=bar_size),
+    autobinx=False
+)
+
+hist2 = go.Histogram(
+    x=hist_df["republican_percentage"],
+    opacity=opacity,
+    marker=dict(color=republican_color),
+    name='Republicans',
+    xbins=dict(size=bar_size),
+    autobinx=False
+)
+
+
+if party_to_show == "Both":
+    hist2.update(yaxis='y2')
+    layout = go.Layout(
+        title='Democrats x Republicans',
+        xaxis=dict(title='Value'),
+        yaxis=dict(title='Count', showgrid=True),
+        yaxis2=dict(title='Count', overlaying='y', side='right', showgrid=False),
+        barmode='overlay',
+        bargap=0.2,
+        showlegend=True
+    )
+
+    fig = go.Figure(data=[hist1, hist2], layout=layout)
+
+elif party_to_show == "Democrats":
+    layout = go.Layout(
+        title='Democrats',
+        xaxis=dict(title='Value'),
+        yaxis=dict(title='Count', showgrid=True),
+        barmode='overlay',
+        bargap=0.2,
+        showlegend=True
+    )
+
+    fig = go.Figure(data=[hist1], layout=layout)
+
+else:
+    layout = go.Layout(
+        title='Republicans',
+        xaxis=dict(title='Value'),
+        yaxis=dict(title='Count', showgrid=True),
+        barmode='overlay',
+        bargap=0.2,
+        showlegend=True
+    )
+
+    fig = go.Figure(data=[hist2], layout=layout)
+
+row3[0].plotly_chart(fig, use_container_width=True)
