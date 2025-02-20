@@ -6,3 +6,4 @@ seaborn
 pandas
 scipy
 numpy
+statsmodels

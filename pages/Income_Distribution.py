@@ -5,6 +5,7 @@ import plotly.express as px
 import numpy as np
 import pandas as pd
 from dataset.get_dataset import get_dataframe
+from helpers.cdf_plot import CDFPlot
 from helpers.pdf_plot import PDFPlot
 
 ## Visualization of this graph still needs to be fixed##
@@ -156,13 +157,23 @@ st.pyplot(fig)
 concetration_percentage = st.slider("Digite o valor da porcentagem desejada.",
                                     min_value=0.0, max_value=1.0, value=0.05, step=0.01, format="%.2f")
 
-[pdf, x] = PDFPlot().plot(
-    desired_percentile=concetration_percentage,
-    real_data=mod_df['Mean income (dollars)'].values,
-)
+col_pdf, col_cdf = st.columns([1, 1])
 
-st.pyplot(pdf)
 
+with col_pdf:
+    [pdf, x] = PDFPlot().plot(
+        desired_percentile=concetration_percentage,
+        real_data=mod_df['Mean income (dollars)'].values,
+    )
+    st.pyplot(pdf)
+
+with col_cdf:
+    [cdf, x_2] = CDFPlot().plot(
+        desired_percentile=concetration_percentage,
+        real_data=mod_df['Mean income (dollars)'].values,
+    )
+
+    st.pyplot(cdf)
 
 st.markdown(
     f'> **Imagem**: Gráfico de área que indica a probabilidade de {(concetration_percentage * 100):.0f}% da população ganhar até US$ {x:.2f}.')
