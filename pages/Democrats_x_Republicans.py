@@ -148,6 +148,11 @@ map_plot = px.choropleth_map(
 )
 row1[0].plotly_chart(map_plot, use_container_width=True)
 
+'''
+    **Imagem:** Mapa dos estados unidos onde cada estado ou cidade é colorida por uma cor
+    representante do partido vencedor na eleição de 2020. Azul para democrata e vermelho para republicano
+'''
+
 #preparing df for the barplot
 counts = map_df["winner party"].value_counts()
 counts_df = pd.DataFrame(counts).transpose()
@@ -178,6 +183,10 @@ bar_plot.update_layout(
 bar_plot.update_traces(textposition='outside', textfont=dict(size=16))
 
 row2[0].plotly_chart(bar_plot, use_container_width=True)
+
+'''
+    **Imagem:** gráfico de barras comparando número de cidade ou estados vencedores de cada partido
+'''
 
 row3 = st.columns(1)
 
@@ -242,3 +251,8 @@ else:
     fig = go.Figure(data=[hist2], layout=layout)
 
 row3[0].plotly_chart(fig, use_container_width=True)
+
+'''
+    **Imagem:** histograma demonstrando a distribuição da porcentagem de votos democratas e republicanos
+    por cidade ou estado
+'''

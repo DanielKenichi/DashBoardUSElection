@@ -121,6 +121,11 @@ gini_scatter_plot = get_scatter_plot(
 
 giniCol1.plotly_chart(gini_scatter_plot, use_container_width=True)
 
+with giniCol1:
+    '''
+        **Imagem:** scatter plot do gini index com a porcentagem de votos do partido democrata ou republicano
+    '''
+    
 mean_scatter_plot = get_scatter_plot(
     "Mean income (dollars)",
     y_axis_field,
@@ -130,6 +135,11 @@ mean_scatter_plot = get_scatter_plot(
 )
 
 meanCol1.plotly_chart(mean_scatter_plot, use_container_width=True)
+
+with meanCol1:
+    '''
+    **Imagem:** scatter plot da media de renda com a porcentagem de votos do partido democrata ou republicano
+    '''
 
 median_scatter_plot = get_scatter_plot(
     "Median income (dollars)",
@@ -141,6 +151,11 @@ median_scatter_plot = get_scatter_plot(
 
 medianCol1.plotly_chart(median_scatter_plot, use_container_width=True)
 
+with medianCol1:
+    '''
+    **Imagem:** scatter plot da mediana de renda com a porcentagem de votos do partido democrata ou republicano
+    '''
+
 medianCol2, meanCol2 = st.columns(2)
 giniCol2 = st.columns(1)[0]
 
@@ -148,10 +163,25 @@ gini_matrix_plot = get_corr_matrix_plot("Gini Index", y_axis_field)
 
 giniCol2.plotly_chart(gini_matrix_plot, use_container_width=True)
 
+with giniCol2:
+    '''
+        **Imagem:** matriz de correlação do gini index com a porcentagem de votos do partido democrata ou republicano
+    '''
+
 mean_matrix_plot = get_corr_matrix_plot("Mean income (dollars)", y_axis_field)
 
 meanCol2.plotly_chart(mean_matrix_plot, use_container_width=True)
 
+with meanCol2:
+    '''
+        **Imagem:** matriz de correlação da media de renda com a porcentagem de votos do partido democrata ou republicano
+    '''
+
 median_matrix_plot = get_corr_matrix_plot("Median income (dollars)", y_axis_field)
 
 medianCol2.plotly_chart(median_matrix_plot, use_container_width=True)
+
+with medianCol2:
+    '''
+        **Imagem:** matriz de correlação da mediana de renda com a porcentagem de votos do partido democrata ou republicano
+    '''
