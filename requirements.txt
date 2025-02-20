@@ -3,3 +3,6 @@ plotly
 kagglehub
 matplotlib
 seaborn
+pandas
+scipy
+numpy
