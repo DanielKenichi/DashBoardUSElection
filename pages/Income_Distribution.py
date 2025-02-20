@@ -6,6 +6,7 @@ import plotly.express as px
 import pandas as pd
 import requests
 from dataset.get_dataset import get_dataframe
+from helpers.pdf_plot import PDFPlot
 
 ##Visualization of this graph still needs to be fixed##
 
@@ -107,3 +108,15 @@ fig_median.update_traces(
 )
 
 st.plotly_chart(fig_median)
+
+
+'''
+# Concentração de renda por estado.
+
+...
+'''
+
+concetration_percentage = st.number_input("Digite o valor de alpha", min_value=0.0, max_value=1.0, value=0.05, step=0.01)
+
+pdf = PDFPlot(n=1000, mean=100, std_deviation=15).plot(desired_percentile=concetration_percentage)
+st.pyplot(pdf)
