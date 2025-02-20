@@ -1,15 +1,11 @@
+from typing import Tuple
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import norm
 
 
 class PDFPlot:
-    def __init__(self, n: int, mean: float, std_deviation: float):
-        self.n = n
-        self.mean = mean
-        self.std_deviation = std_deviation
-
-    def plot(self, desired_percentile: float, real_data: np.array) -> plt.Figure:
+    def plot(self, desired_percentile: float, real_data: np.array) -> Tuple[plt.Figure, float]:
         counts, bin_edges = np.histogram(real_data, bins=50, density=True)
         x = (bin_edges[:-1] + bin_edges[1:]) / 2  # centros dos bins
         probList = counts
@@ -20,6 +16,9 @@ class PDFPlot:
         ax.fill_between(x, probList, facecolor='blue', alpha=0.3)
 
         x_percent = np.percentile(real_data, desired_percentile * 100)
+
+        mean = np.mean(real_data)
+        std_deviation = np.std(real_data)
 
         mask = x < x_percent
         ax.fill_between(x[mask], np.array(probList)[mask], facecolor='darkred')
@@ -34,11 +33,11 @@ class PDFPlot:
 
         ax.set_xlabel('Valor', fontsize=22)
         ax.set_ylabel('Densidade de Probabilidade', fontsize=22)
-        ax.set_title(f'PDF, $N(\\mu={self.mean}, \\sigma={self.std_deviation}) \quad X = {x_percent:.2f}$', fontsize=14, weight='bold')
+        ax.set_title(f'PDF, $N(\\mu={mean:.2f}, \\sigma={std_deviation:.2f}) \quad X = {x_percent:.2f}$', fontsize=14, weight='bold')
         ax.axvline(x_percent, linewidth=1, linestyle='-.', color='darkred')
 
         ax.text(0.95, 0.85, f"X = {x_percent:.2f}", transform=ax.transAxes,
                 fontsize=12, color='black', horizontalalignment='right')
 
         fig.tight_layout()
-        return fig
+        return [fig, x_percent]

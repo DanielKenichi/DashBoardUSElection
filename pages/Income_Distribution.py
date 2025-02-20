@@ -119,8 +119,11 @@ st.plotly_chart(fig_median)
 
 concetration_percentage = st.slider("Digite o valor da porcentagem desejada.", min_value=0.0, max_value=1.0, value=0.05, step=0.01, format="%.2f")
 
-pdf = PDFPlot(n=1000, mean=100, std_deviation=15).plot(
+[pdf, x] = PDFPlot().plot(
     desired_percentile=concetration_percentage,
-    real_data=mod_df['Mean income (dollars)'].values
+    real_data=mod_df['Mean income (dollars)'].values,
 )
+
 st.pyplot(pdf)
+
+st.markdown(f'> **Imagem**: Gráfico de área que indica a probabilidade de {(concetration_percentage * 100):.0f}% da população ganhar até US$ {x:.2f}.')
