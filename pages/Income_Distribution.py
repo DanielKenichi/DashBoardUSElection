@@ -49,8 +49,18 @@ st.markdown(
 df = get_dataframe()
 mod_df = get_state_data(df)  # Use o dataframe agregado por estado!
 
+col1, col2 = st.columns([1, 1])
+
+with col1:
+    selected_state_pdf = st.selectbox(
+        "Selecione o estado",
+        sorted(df["state"].unique())
+    )
+
+df_state_violin = mod_df[mod_df["state"] == selected_state_pdf]
+
 # Violin plot para Mean Income
-fig_mean = px.violin(mod_df,
+fig_mean = px.violin(df_state_violin,
                      y="Mean income (dollars)",
                      x="state",
                      color="most_voted_party",
@@ -86,7 +96,7 @@ renda por estado, levando em consideração o partido ganhador
 '''
 
 # Violin plot para Median Income (similar ao anterior)
-fig_median = px.violin(mod_df,
+fig_median = px.violin(df_state_violin,
                        y="Median income (dollars)",
                        x="state",
                        color="most_voted_party",
@@ -143,7 +153,6 @@ st.pyplot(fig)
 **Imagem:** Histograma de renda média dos EUA.
 '''
 
-
 concetration_percentage = st.slider("Digite o valor da porcentagem desejada.",
                                     min_value=0.0, max_value=1.0, value=0.05, step=0.01, format="%.2f")
 
@@ -158,15 +167,15 @@ st.pyplot(pdf)
 st.markdown(
     f'> **Imagem**: Gráfico de área que indica a probabilidade de {(concetration_percentage * 100):.0f}% da população ganhar até US$ {x:.2f}.')
 
-col1, col2 = st.columns([1, 1])
+col3, col4 = st.columns([1, 1])
 
-with col1:
+with col3:
     selected_state_pdf = st.selectbox(
         "Selecione o estado para o PDF de renda",
         sorted(df["state"].unique())
     )
 
-with col2:
+with col4:
     df_state_pdf = mod_df[mod_df["state"] == selected_state_pdf]
 
     concetration_percentage = st.slider(
