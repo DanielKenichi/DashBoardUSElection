@@ -117,7 +117,7 @@ st.plotly_chart(fig_median)
 ...
 '''
 
-concetration_percentage = st.number_input("Digite o valor de alpha", min_value=0.0, max_value=1.0, value=0.05, step=0.01)
+concetration_percentage = st.slider("Digite o valor da porcentagem desejada.", min_value=0.0, max_value=1.0, value=0.05, step=0.01, format="%.2f")
 
 pdf = PDFPlot(n=1000, mean=100, std_deviation=15).plot(
     desired_percentile=concetration_percentage,
